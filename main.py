@@ -235,8 +235,13 @@ class App(ImageDisplayCache):
 
         self.contextMenuShow = []
 
-        if not os.path.exists("NEURAL NETWORKS/"):
-            os.mkdir("NEURAL NETWORKS/")
+        # Base directory: folder where the executable or script resides
+        BASE_DIR = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
+
+        # Create subdirectories alongside the executable
+        for folder in ["NEURAL NETWORKS", "presets", "pipelines"]:
+            path = os.path.join(BASE_DIR, folder)
+            os.makedirs(path, exist_ok=True)
 
         LOADLOCKSTATE["load_point"] = "Loading semantic model"
         MODEL = "ITER17_SM_SHAPE_384x384x1_1.keras"
