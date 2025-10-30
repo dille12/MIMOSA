@@ -1,11 +1,25 @@
+import os, sys
+
+if getattr(sys, 'frozen', False):
+    os.chdir(sys._MEIPASS)
+    FROZEN = True
+else:
+    FROZEN = False
+
+print("FROZEN:", FROZEN)
+
 import pygame
 import time
 import threading
-import sys
-import os
+
 from loadLock import *
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 import math
+
+
+
+
+
 def raster_scan_reveal(screen, source_surface, progress, position, kernel_size=5):
     """
     Reveals an image progressively using a raster scanning pattern with kernels.
@@ -128,15 +142,15 @@ def main():
 
     screen_width, screen_height = 400, 400
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.NOFRAME)
-    image = pygame.image.load("core/ICON.png").convert_alpha()
+    image = pygame.image.load("assets/ICON.png").convert_alpha()
     image = pygame.transform.scale(image, [400, 400])
 
     pygame.display.set_caption("MIMOSA")
-    pygame.display.set_icon(pygame.image.load("core/ICON.png").convert_alpha())
+    pygame.display.set_icon(pygame.image.load("assets/ICON.png").convert_alpha())
 
     splash_color = (0, 0, 0)
-    font = pygame.font.Font("core/terminal.ttf", 60)
-    font2 = pygame.font.Font("core/terminal.ttf", 20)
+    font = pygame.font.Font("assets/terminal.ttf", 60)
+    font2 = pygame.font.Font("assets/terminal.ttf", 20)
     text_surface = font.render("MIMOSA", True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
 

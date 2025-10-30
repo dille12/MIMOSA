@@ -129,7 +129,7 @@ def export(App: "App", Node: "Node", image_array: np.ndarray) -> None:
     """
 
     MENUTYPE:Essential
-    HELP:Exports the image to the viewport background. This node initiates the whole pipeline, so ensure that the node network is fully connected.
+    HELP:Exports the image to the viewport background. This node initiates the whole pipeline, so ensure that the node network is fully connected. The save dropdown saves this image to the CNN train directory, so keep at Skip unless otherwise desired. 
     DROPDOWN:Saving:Skip:Save
     """
     SEL = Node.utility[0].dropDownSelections[Node.utility[0].value]

@@ -5,3 +5,5 @@
 *RESET.pkl
 *results*
 *.ppl
+dist*
+build*

@@ -141,7 +141,7 @@ class App(ImageDisplayCache):
         self.NODES = []
         self.CURR_NODES = self.NODES
 
-        self.VIGNETTE = pygame.image.load("core/vignette.png").convert_alpha()
+        self.VIGNETTE = pygame.image.load("assets/vignette.png").convert_alpha()
 
         self.THRESHOLD = sliderIndependent([20,20], self, 0, 10, 5, "Diameter threshold")
         self.ADJUSTX = sliderIndependent([20,700], self, -10, 10, 1, "ADJUSTX")
@@ -157,9 +157,9 @@ class App(ImageDisplayCache):
         
         
         self.DATAPATH = self.MAINPATH + "/data"
-        self.lastIm = self.get_value("lastIm", "D13_03.tif")
+        self.lastIm = self.get_value("lastIm", "assets/D13_03.tif")
         if not os.path.exists(self.lastIm):
-            self.lastIm = "D13_03.tif"
+            self.lastIm = "assets/D13_03.tif"
 
 
         self.loadImage(self.lastIm)
@@ -168,16 +168,16 @@ class App(ImageDisplayCache):
         self.keypress = []
         self.keypress_held_down = []
 
-        self.restartSaveFile = os.path.join(os.getcwd(), "RESET.pkl")
+        self.restartSaveFile = os.path.join(os.getcwd(), "data/RESET.pkl")
         
         self.cameraPos = v2([1920/2,1080/2]) - v2(self.image.get_size())/2
         self.mouse_pos = v2([0,0])
-        self.font = pygame.font.Font("core/terminal.ttf", 30)
-        self.fontSmall = pygame.font.Font("core/terminal.ttf", 20)
-        self.fontSmaller = pygame.font.Font("core/terminal.ttf", 10)
-        self.fontNode = pygame.font.Font("core/terminal.ttf", 16)
+        self.font = pygame.font.Font("assets/terminal.ttf", 30)
+        self.fontSmall = pygame.font.Font("assets/terminal.ttf", 20)
+        self.fontSmaller = pygame.font.Font("assets/terminal.ttf", 10)
+        self.fontNode = pygame.font.Font("assets/terminal.ttf", 16)
         #self.fontNode.set_script(True)
-        self.fontRoboto = pygame.font.Font("core/Roboto-Regular.ttf", 20)
+        self.fontRoboto = pygame.font.Font("assets/Roboto-Regular.ttf", 20)
         self.imagePos = v2([0,0])
         self.luminositySlider = Slider(self, 0, 255, 128, [1920 - 220, 20], self.applyLuminosityMask, [])
         self.edgeDetectionSlider = Slider(self, 0, 100, 10, [1920 - 220, 60], self.edgeDetectionActivator, [])
@@ -235,15 +235,20 @@ class App(ImageDisplayCache):
 
         self.contextMenuShow = []
 
-        LOADLOCKSTATE["load_point"] = "Loading iteration 16 model"
+        if not os.path.exists("NEURAL NETWORKS/"):
+            os.mkdir("NEURAL NETWORKS/")
+
+        LOADLOCKSTATE["load_point"] = "Loading semantic model"
         MODEL = "ITER17_SM_SHAPE_384x384x1_1.keras"
-        self.MODEL = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
+        if os.path.exists(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}"):
+            self.MODEL = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
 
 
 
         LOADLOCKSTATE["load_point"] = "Loading segmentation model"
         MODEL = "ITER21_RETRAIN_765IMAGES_SHAPE_128x128x1_1.keras"
-        self.MODELSEGM = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
+        if os.path.exists(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}"):
+            self.MODELSEGM = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
         
         
 
@@ -341,9 +346,9 @@ class App(ImageDisplayCache):
         self.res_save = self.res.copy()
         self.screen = pygame.display.set_mode(self.res, pygame.RESIZABLE)
         pygame.display.set_caption("MIMOSA")
-        pygame.display.set_icon(pygame.image.load("core/ICON.png").convert_alpha())
+        pygame.display.set_icon(pygame.image.load("assets/ICON.png").convert_alpha())
 
-        self.rectRenderer = rectRenderer(self.MAINPATH + "/core/ICONpixelmap.png")
+        self.rectRenderer = rectRenderer(self.MAINPATH + "/assets/ICONpixelmap.png")
 
         print("Screen initialized")
 
