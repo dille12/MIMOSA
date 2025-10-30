@@ -1,0 +1,16 @@
+matplotlib
+numba
+numpy
+opencv_python==4.10.0.84
+pygame-ce
+scikit_learn==1.6.0
+scipy==1.14.1
+scikit-image
+tensorflow==2.18.0
+tensorflow_intel==2.18.0
+tifffile==2024.12.12
+pyperclip
+pandas
+segmentation_models
+seaborn
+openpyxl
