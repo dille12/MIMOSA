@@ -550,15 +550,15 @@ class App(ImageDisplayCache):
 
         try:
             print("Loading image...")
-            imName = Path(f).stem
+            #imName = Path(f).stem
             #print(imName)
-            trainIms = os.listdir("AI/train_images")
+            #trainIms = os.listdir("AI/train_images")
             #print(trainIms)
-            trainImNames = " ".join(trainIms)
+            #trainImNames = " ".join(trainIms)
             #print(trainImNames)
-            if imName in trainImNames:
-                print("IMAGE ALREADY PRESENT")
-                self.notify("This image is already in training directory.")
+            #if imName in trainImNames:
+            #    print("IMAGE ALREADY PRESENT")
+            #    self.notify("This image is already in training directory.")
             self.loadImage(image_path=f)
             
         except Exception as e:

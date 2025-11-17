@@ -7,3 +7,4 @@
 *.ppl
 dist*
 build*
+*.xlsx

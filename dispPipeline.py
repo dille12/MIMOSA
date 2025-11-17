@@ -195,10 +195,11 @@ import skimage
 
 
 class Particle:
-    def __init__(self, image: "ImageDataObj", area, diameter):
+    def __init__(self, image: "ImageDataObj", area, diameter, coords = None):
         image.PARTICLES.append(self)
         self.particle_pixels = area
         self.diameter = diameter
+        self.coords = coords
 
         self.real_area = self.particle_pixels*image.pixel_area
         self.real_diameter = self.diameter * image.pixel_length
@@ -231,6 +232,8 @@ class ImageDataObj:
         self.useInDispersionAnalysis = "undefined"
         self.LOADED = True
         self.deltaPos = None
+
+        self.PARTICLES = []
 
         self.toolTip = toolTip.toolTip(self.app, self, self.key, "An image with loaded metadata. Drag with primary mouse button into a defined sample to include it in the dispersion analysis Press DEL to delete. If particle map present, right click to inspect. Note: images under UNSORTED are not processed.")
         try:
@@ -323,14 +326,17 @@ class ImageDataObj:
         props = skimage.measure.regionprops(labeled_image)         
         max_diameters = {}
         areas = {}
+        coordinates = {}
         self.app.PIPELINESUBPROGRESS = 0         
         for i, prop in enumerate(props):              
             self.app.PIPELINESUBPROGRESS = i/len(props)              
             coords = prop.coords
             areas[prop.label] = prop.area
+            coordinates[prop.label] = coords
                             
             if len(coords) < 2:                 
-                max_diameters[prop.label] = 0             
+                max_diameters[prop.label] = 1.0
+                print("Single pixel particle found")          
             elif len(coords) < 4:                 
                 # Too few points for convex hull                 
                 distances = pdist(coords)                 
@@ -339,7 +345,8 @@ class ImageDataObj:
                 try:                     
                     # Use convex hull to reduce computation                     
                     hull = ConvexHull(coords)                     
-                    hull_points = coords[hull.vertices]                     
+                    hull_points = coords[hull.vertices]    
+                    coordinates[prop.label] = hull_points                 
                     distances = pdist(hull_points)                     
                     max_diameters[prop.label] = distances.max()                 
                 except:                     
@@ -347,7 +354,7 @@ class ImageDataObj:
                     distances = pdist(coords)                     
                     max_diameters[prop.label] = distances.max()                  
         
-        return max_diameters, areas
+        return max_diameters, areas, coordinates
 
     def getParticles(self):
         self.tempProgressImage = self.resultarray.copy()
@@ -368,14 +375,17 @@ class ImageDataObj:
         print("IMAGE AREA:", self.image_area)
         print("OLD IMAGE AREA:", self.FOV.getAreaOfImage())
 
-        max_diameters, areas = self.batch_particle_max_diameters_fast(labels)
+        max_diameters, areas, coordinates = self.batch_particle_max_diameters_fast(labels)
 
         self.PARTICLES = []
 
         for label in areas:
             d = max_diameters[label]
             a = areas[label]
-            Particle(self, a, d)
+            c = coordinates[label]
+            if d > 100:
+                print("AREA:", a, "DIAMETER:", d, "COORDS:", c)
+            Particle(self, a, d, coords = c)
 
         self.app.AiProcessRect = None
 
@@ -708,8 +718,11 @@ class Sample:
             "URF99": f"{self.URF99:.3f}um",
             "EXPORT": f"{self.ExportData}"
         }
-
-        update_global_dispersion_data(self.text, self.additionaldata, app = self.app)
+        try:
+            update_global_dispersion_data(self.text, self.additionaldata, app = self.app)
+        except Exception as e:
+            print("Error updating global dispersion data:", e)
+            traceback.print_exc()
 
 
 
@@ -945,15 +958,57 @@ def pipelineTick(app: "App"):
 
         pipelineTickMenu(app)
 
-      
+def renderInspectImage(app: "App"):
+    im = app.InspectImages[0]
+
+    surf = im.resultInspectSurface if app.inspectToggle else im.InspectSurface
+
+    # Centered horizontal blit position
+    offset_x = app.res[0] / 2 - surf.get_width() / 2
+    offset_y = 0
+
+    app.screen.blit(surf, (offset_x, offset_y))
+
+    if not im.PARTICLES:
+        return
+
+    # Original and display dimensions
+    w0, h0 = im.resultarray.shape[:2]
+    w1, h1 = surf.get_size()
+
+    sx = w1 / w0
+    sy = h1 / h0
+
+    for particle in im.PARTICLES:
+        if not isinstance(particle.coords, np.ndarray):
+            continue
+        y = particle.coords[:, 1]
+        x = particle.coords[:, 0]
+
+        # Scale
+        xs = x * sx
+        ys = y * sy
+
+        # Apply blit offset
+        xs = (xs + offset_x).astype(int)
+        ys = (ys + offset_y).astype(int)
+
+        pts = list(zip(xs, ys))
+
+        color = [255,0,0] if particle.real_diameter >= 5 else [0,255,0]
+
+        if len(pts) > 1:
+            pts.append(pts[0])  # Close the loop
+            pygame.draw.lines(app.screen, color, False, pts, 2)
+        else:
+            pygame.draw.circle(app.screen, color, pts[0], 2)
+
+
 
 def inspect(app: "App"):
     im = app.InspectImages[0]
 
-    if app.inspectToggle:
-        app.screen.blit(im.resultInspectSurface, [app.res[0]/2 - im.resultInspectSurface.get_size()[0]/2, 0])
-    else:
-        app.screen.blit(im.InspectSurface, [app.res[0]/2 - im.resultInspectSurface.get_size()[0]/2, 0])
+    renderInspectImage(app)
 
     t = app.font.render(im.key, True, [255,255,255])
     app.screen.blit(t, [20,100])
