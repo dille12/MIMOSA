@@ -22,6 +22,8 @@ from core.contextMenu import ContextMenu
 def is_jitted(func):
     return isinstance(func, CPUDispatcher)
 
+from core.keyhint import KeyHint
+
 DROPDOWN = 1
 SLIDER = 2
 FILEINPUT = 3
@@ -69,6 +71,15 @@ class Node:
         self.name = name
 
         self.parentList = None
+
+
+        self.moveKH = KeyHint(app, "RCLICK (HOLD)", "Move node")
+        self.contextKH = KeyHint(app, "RCLICK", "Access context menu")
+        self.disconnectKH = KeyHint(app, "SHIFT + RCLICK", "Disconnect node from all")
+        #self.initCalcKH = KeyHint(app, "SHIFT + LCLICK", "Recalculate from this node")
+        self.viewOutputKH = KeyHint(app, "SHIFT + LCLICK", "View this nodes output")
+        self.disableKH = KeyHint(app, "CTRL + LCLICK", "Disable node")
+        self.deleteKH = KeyHint(app, "DEL", "Delete node")
 
         self.waveTick = app.GT(90)
 
@@ -356,6 +367,18 @@ class Node:
                 self.app.mouseAvailable = False
                 self.app.activeNode = self
                 w = 3
+
+                self.moveKH.active = True
+
+                if isinstance(self.STASHEDRESULT, np.ndarray) or self.godNode:
+                    self.viewOutputKH.active = True
+                self.disableKH.active = True
+                self.deleteKH.active = True
+
+                self.contextKH.active = True
+                self.disconnectKH.active = True
+                
+                
 
                 self.toolTip.render()
 

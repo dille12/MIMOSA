@@ -5,6 +5,10 @@ from core.funcs.toolTip import toolTip
 import pygame
 import math
 import traceback
+
+from core.keyhint import KeyHint
+
+
 def fetchNodeIOtype(typeC):
 
     if str(typeC) == "<class 'int'>" or str(typeC) == "<class 'float'>" or str(typeC) == "int":
@@ -55,6 +59,12 @@ class InputNode:
 
         self.stashInput = None
         self.connectOnRelease = None
+
+
+        self.connectKH = KeyHint(self.app, "LCLICK", "Start a connection")
+        self.fConnectKH = KeyHint(self.app, "LCLICK", "Connect the nodes")
+        self.deleteConnKH = KeyHint(self.app, "RCLICK", "Delete connection")
+        self.cancelKH = KeyHint(self.app, "RCLICK", "Cancel")
         
         self.waveI = 0
 
@@ -227,6 +237,15 @@ class InputNode:
             self.app.mouseAvailable = False
 
             self.toolTip.render()
+
+            
+
+            if not self.app.activeInputNode:
+                self.connectKH.active = True
+            else:
+                self.fConnectKH.active = True
+
+            self.deleteConnKH.active = True
 
             if "mouse2" in self.app.keypress:
                 self.disconnect()

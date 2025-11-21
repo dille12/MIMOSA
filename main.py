@@ -42,7 +42,7 @@ from core.button import Button
 from dispPipeline import pipelineTick, Sample, fast_mean_feret_diameter
 from AI.loadCustomModel import load_custom_segmentation_model
 from core.funcs.rectRenderer import rectRenderer
-
+from core.keyhint import KeyHint
 from core.configureMask import configureMask
 
 LOADLOCKSTATE["load_point"] = "Imports Done!"
@@ -111,11 +111,13 @@ class Notification:
 
 class App(ImageDisplayCache):
     def __init__(self):
+        self.keyhints = []
         print("Initializing app!")
         LOADLOCKSTATE["load_point"] = "Initializing app"
         pygame.init()
         super().__init__()
         self.notifications = []
+        
 
         infoObject = pygame.display.Info()
         self.fullres = v2(infoObject.current_w, infoObject.current_h)
@@ -224,11 +226,15 @@ class App(ImageDisplayCache):
         print("DATA PATH", self.DATAPATH)
         print(os.path.exists(self.DATAPATH)) 
 
-
+        
         self.separateDisplay = False
         self.dualWindow = None
         self.dualWindowSurf = None
 
+        self.mMouseKH = KeyHint(self, "MIDDLE MOUSE", "Pan view")
+        self.zoomKH = KeyHint(self, "SCROLL WHEEL", "Zoom")
+        self.defineRenderWindowKH = KeyHint(self, "LCLICK (HOLD)", "Draw a render window")
+        self.deleteRenderWindow = KeyHint(self, "R", "Delete render window")
 
         self.rightClickTick = 0
 
@@ -239,21 +245,21 @@ class App(ImageDisplayCache):
         BASE_DIR = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
 
         # Create subdirectories alongside the executable
-        for folder in ["NEURAL NETWORKS", "presets", "pipelines"]:
+        for folder in ["NEURALNETWORKS", "presets", "pipelines"]:
             path = os.path.join(BASE_DIR, folder)
             os.makedirs(path, exist_ok=True)
 
         LOADLOCKSTATE["load_point"] = "Loading semantic model"
         MODEL = "ITER17_SM_SHAPE_384x384x1_1.keras"
-        if os.path.exists(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}"):
-            self.MODEL = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
+        if os.path.exists(f"{self.MAINPATH}/NEURALNETWORKS/{MODEL}"):
+            self.MODEL = load_custom_segmentation_model(f"{self.MAINPATH}/NEURALNETWORKS/{MODEL}")
 
 
 
         LOADLOCKSTATE["load_point"] = "Loading segmentation model"
         MODEL = "ITER21_RETRAIN_765IMAGES_SHAPE_128x128x1_1.keras"
-        if os.path.exists(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}"):
-            self.MODELSEGM = load_custom_segmentation_model(f"{self.MAINPATH}/NEURAL NETWORKS/{MODEL}")
+        if os.path.exists(f"{self.MAINPATH}/NEURALNETWORKS/{MODEL}"):
+            self.MODELSEGM = load_custom_segmentation_model(f"{self.MAINPATH}/NEURALNETWORKS/{MODEL}")
         
         
 
@@ -364,6 +370,22 @@ class App(ImageDisplayCache):
     def notify(self, text):
         Notification(self, text)
         print("Notification:", text)
+
+    
+    def refreshKeyHints(self):
+        for hint in self.keyhints:
+            hint.active = False
+
+    def renderKeyHints(self):
+        i = 0
+        for hint in self.keyhints:
+            if not hint.active:
+                continue
+
+            x = 20
+            y = 300 + i * 30
+            self.screen.blit(hint.surface, (x,y))
+            i+=1
 
 
     def drawLogo(self):
@@ -508,7 +530,7 @@ class App(ImageDisplayCache):
             defaultextension=".keras",
             filetypes=[("KERAS models", "*.keras")],  # Only allow .pkl files
             title="Stage AI",
-            initialdir=f"{self.MAINPATH}/NEURAL NETWORKS")
+            initialdir=f"{self.MAINPATH}/NEURALNETWORKS")
         #model_path = "particle_segmentation_unet.keras"  # Path to the trained model
         self.notify("Loading AI model...")
         self.MODEL = load_custom_segmentation_model(model_path)
@@ -733,6 +755,10 @@ class App(ImageDisplayCache):
 
     def loop(self):
 
+        self.refreshKeyHints()
+
+        
+
         self.mouseAvailable = True
         if self.fullscreen:
             self.res = v2(self.fullres)
@@ -777,6 +803,9 @@ class App(ImageDisplayCache):
 
         try:
             if self.mode in [0, 1] or self.separateDisplay:
+
+                self.mMouseKH.active = True
+
                 self.displayImageCached()
                 self.drawRenderRect()
                 self.visualizeModel()
@@ -789,6 +818,10 @@ class App(ImageDisplayCache):
 
         if self.mode == 1 or self.separateDisplay:
             #self.renderSl iders()
+            self.zoomKH.active = True
+            self.defineRenderWindowKH.active = True
+            if self.renderRect:
+                self.deleteRenderWindow.active = True
             self.handleMouseImPos()
 
             
@@ -811,6 +844,7 @@ class App(ImageDisplayCache):
         elif "enter" in self.keypress:
             self.execCalc()
         
+        self.renderKeyHints()
 
         self.tickToolTips()
 
@@ -826,6 +860,8 @@ class App(ImageDisplayCache):
         temp = self.notifications.copy()
         for x in temp:
             x.tick()
+
+        
 
 
     def clearCache(self):
@@ -1064,7 +1100,7 @@ class App(ImageDisplayCache):
 
         if self.activeInputNode:
 
-
+            self.activeInputNode.cancelKH.active = True
             draw_bezier_curve(self.screen, [255,0,0], self.activeInputNode.pos + self.activeInputNode.parent.pos, self.mouse_pos, steps = 15, width = 2)
             if "mouse2" in self.keypress:
                 self.activeInputNode = None

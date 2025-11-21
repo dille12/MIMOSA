@@ -1,6 +1,6 @@
 # MIMOSA
 
-**MIMOSA** (Microscopy IMage prOcessing SoftwAre) is a **node-based image analysis toolkit** for dispersion accurate measurements **SEM images**. It provides a modular framework for **particle detection**, **dispersion analysis**, and **morphological quantification**, optimized for large image batches and research on **rubber–lignin composites**.
+**MIMOSA** (Microscopy IMage prOcessing SoftwAre) is a **node-based image analysis toolkit** for accurate dispersion measurements for large datasets of **SEM images**. It provides a modular framework for particle segmentation and dispersion measurement, optimized for large image batches and research on **rubber–lignin composites**.
 
 ---
 
