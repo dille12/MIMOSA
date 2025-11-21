@@ -19,3 +19,6 @@
 git clone https://github.com/dille12/MIMOSA.git
 cd MIMOSA
 pip install -r requirements.txt
+```
+Download the neural network package from the Releases tab by clicking [here](https://github.com/dille12/MIMOSA/releases/tag/1.0).
+
