@@ -28,7 +28,7 @@ os.environ['SM_FRAMEWORK'] = 'tf.keras'
 from pathlib import Path
 from _thread import start_new_thread
 from core.funcs.saveload import saveSetupClean, loadSetupClean
-
+from utils.config import load_config
 from AI.ai_core import load_model  
 import traceback
 import core.pipelines
@@ -186,6 +186,9 @@ class App(ImageDisplayCache):
         self.mode = 0
         self.modeX = 0
 
+
+        self.CONFIG = load_config()
+
         self.nodeColorGrade = {
             "Math": 210,         # Cool blue for mathematical precision and logic
             "Thresholding": 40,  # Warm yellow for decision-making and cutoffs
@@ -333,6 +336,10 @@ class App(ImageDisplayCache):
         self.separateDisplay = False
         self.dualWindow = None
         self.dualWindowSurf = None
+
+
+    def loadConfig(self):
+        self.CONFIG = load_config()
 
         
     def separateScreen(self):

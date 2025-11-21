@@ -1,0 +1,21 @@
+field_of_view:
+  mode: metadata
+  textfile:
+    FOV_KEY: CM_FIELD_OF_VIEW
+    STAGE_POS_KEY: CM_STAGE_POSITION
+    IMAGE_SIZE_KEY: CM_IMAGE_SIZE
+    MAGNIFICATION_KEY: CM_MAG
+    line_separator: $
+  metadata:
+    FOV_KEY: CM_FIELD_OF_VIEW
+    FOV_KEY_X: CZ_SEM.ap_stage_field_size_x
+    FOV_KEY_Y: CM_FIELD_OF_VIEW_Y
+    STAGE_POS_KEY: CM_STAGE_POSITION
+    IMAGE_SIZE_KEY: CM_IMAGE_SIZE
+    MAGNIFICATION_KEY: CM_MAG
+  exif:
+    tag: XResolution
+  constant:
+    value: 500.0
+  custom:
+    script: ./fov_hook.py

@@ -32,5 +32,6 @@ def read_metadata_tifffile(file_path):
 if __name__ == "__main__":
     
     path_to_tiff = "S:/71201_ElCo/Personal datafolders/Viliam/Old SEM images/14_2/N_14_2_04.tif"  # Replace with your file path
+    #path_to_tiff = "C:/Users/cgvisa/Documents/MIMOSA BACKUP/images divided by sample/EPDM/EPDM LIG D/16-5_0018.tif"
     read_metadata_pillow(path_to_tiff)
     read_metadata_tifffile(path_to_tiff)

@@ -22,6 +22,9 @@ from core.funcs.saveload import saveSetupClean, loadSetupClean
 from scipy.stats import mode
 import tkinter as tk
 from core.globalArray import update_global_dispersion_data
+
+from utils.metadataExtract import extract_value, flatten_dict
+
 def export_csv_with_dialog(csv_string, default_filename="dispersion_data.csv"):
 
     file_path = filedialog.asksaveasfilename(
@@ -64,12 +67,14 @@ def get_max_diameter(label_array, label):
     # Return the maximum distance found
     return np.max(pairwise_distances)
 
-def fetchData(txtfile) -> dict:
+def fetchData(txtfile, app) -> dict:
 
     with open(txtfile, encoding="utf-8", errors="ignore") as f:
         data = f.read()
 
-    d = data.split("$")
+    separator = app.CONFIG["field_of_view"].get("textfile", {}).get("line_separator", "\n")
+    print("SEPARATOR:", repr(separator))
+    d = data.split(separator)
     d2 = {}
     for x in d:
         x = x.rstrip("\n")
@@ -220,8 +225,14 @@ def count_pixels_numba(label_array):
 
 class ImageDataObj:
     def __init__(self, app: "App", key, d):
+
+        app.loadConfig()
+        
+
+
         self.tifPath = d["tif"]
-        self.txtPath = d["txt"]
+        if "txt" in d:
+            self.txtPath = d["txt"]
         self.app = app
         self.key = key
 
@@ -230,6 +241,9 @@ class ImageDataObj:
         self.resultSmallSurface = None
         self.resultInspectSurface = None
         self.useInDispersionAnalysis = "undefined"
+
+        self.extractMetadata()
+
         self.LOADED = True
         self.deltaPos = None
 
@@ -257,13 +271,9 @@ class ImageDataObj:
         ContextMenu(self, "Make/View individual node structure", function=lambda: self.viewIndividual())
         ContextMenu(self, "Delete individual node structure", function=lambda: self.delIndividual())
 
-        d = fetchData(self.txtPath)
-        self.FOVVal = d["CM_FIELD_OF_VIEW"]
-        self.IMAGERES = d["CM_IMAGE_SIZE"]
-        self.MAGNIFICATION = d["CM_MAG"][0]
-        self.SCANROTATION = float(d["SM_SCAN_ROTATION"][0])
-        self.STAGEPOSITION = d["CM_STAGE_POSITION"][0:2]
-        self.STAGEPOSITION = [float(x) for x in self.STAGEPOSITION]
+        
+
+
         print("Stage Position:", self.STAGEPOSITION)
         res = [int(x) for x in self.IMAGERES]
         print("RES:", res)
@@ -277,6 +287,62 @@ class ImageDataObj:
         self.t = self.app.fontSmall.render(self.key, True, [255,255,255])
         self.tr = self.app.fontSmall.render(self.key, True, [255,0,0])
         app.SAMPLEDATA["Unsorted"].images.append(self)
+
+
+    def extractMetadata(self):
+        cfg = self.app.CONFIG["field_of_view"]
+        mode = cfg["mode"]
+
+        # -------------------------
+        # TEXTFILE MODE
+        # -------------------------
+        if mode == "textfile":
+            print("LOADING FROM TEXTFILE")
+            d = fetchData(self.txtPath, self.app)
+            d = flatten_dict(d)
+
+            FOVKEY      = cfg["textfile"].get("FOV_KEY", "FOV")
+            RESKEY      = cfg["textfile"].get("IMAGE_SIZE_KEY", "IMAGE_SIZE")
+            MAGKEY      = cfg["textfile"].get("MAGNIFICATION_KEY", "MAG")
+            STAGEPOSKEY = cfg["textfile"].get("STAGE_POS_KEY", "STAGE_POS")
+
+            self.FOVVal        = extract_value(d, FOVKEY, fmt="raw", default="500µm 500µm")
+            self.IMAGERES      = extract_value(d, RESKEY, fmt="list_float", default=[1024.0, 1024.0])
+            self.MAGNIFICATION = extract_value(d, MAGKEY, fmt="float", default=100.0)
+            self.STAGEPOSITION = extract_value(d, STAGEPOSKEY, fmt="list_first_two_float", default=[0.0, 0.0])
+
+            print(self.FOVVal, self.IMAGERES, self.MAGNIFICATION, self.STAGEPOSITION)
+            return
+
+        # -------------------------
+        # TIFF METADATA MODE
+        # -------------------------
+        if mode == "metadata":
+            print("LOADING FROM METADATA")
+            with tifffile.TiffFile(self.tifPath) as tif:
+                page = tif.pages[0]
+                tags = {tag.name: tag.value for tag in page.tags.values()}
+
+            tags = flatten_dict(tags)
+
+            FOVKEY      = cfg["metadata"].get("FOV_KEY", "XResolution")
+            RESKEY      = cfg["metadata"].get("IMAGE_SIZE_KEY", "ImageWidth")
+            MAGKEY      = cfg["metadata"].get("MAGNIFICATION_KEY", "UnknownTag")
+            STAGEPOSKEY = cfg["metadata"].get("STAGE_POS_KEY", "UnknownTag2")
+
+            self.FOVVal        = extract_value(tags, FOVKEY, fmt="raw", default=["500µm", "500µm"])
+            self.IMAGERES      = extract_value(tags, RESKEY, fmt="float", default=[1024.0, 1024.0])
+            self.MAGNIFICATION = extract_value(tags, MAGKEY, fmt="float", default=100.0)
+            self.STAGEPOSITION = extract_value(tags, STAGEPOSKEY, fmt="list_first_two_float", default=[0.0, 0.0])
+
+            print(self.FOVVal, self.IMAGERES, self.MAGNIFICATION, self.STAGEPOSITION)
+            return
+
+        # -------------------------
+        # UNKNOWN MODE
+        # -------------------------
+        raise ValueError(f"Unsupported FOV extraction mode: {mode}")
+
 
 
     def delIndividual(self):
@@ -1113,7 +1179,8 @@ def pipelineTickMenu(app: "App"):
         for x in file_pairs:
             try:
                 ImageDataObj(app, x, file_pairs[x])
-            except:
+            except Exception as e:
+                print("Error loading image data for", x, ":", e)
                 traceback.print_exc()
 
 

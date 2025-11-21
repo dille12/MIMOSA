@@ -14,3 +14,4 @@ pandas
 segmentation_models
 seaborn
 openpyxl
+PyYAML
