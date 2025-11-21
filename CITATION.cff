@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software in academic work, please cite the master's thesis below."
+authors:
+  - family-names: "Sälli"
+    given-names: "Viliam"
+title: "Automatization of lignin dispersion analysis in rubber with deep learning and purpose-built software"
+type: thesis
+thesis-type: master's
+institution: "Tampere Universities"
+year: 2025
+doi: ""
+url: "https://urn.fi/URN:NBN:fi:tuni-202506117087"
