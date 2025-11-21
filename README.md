@@ -20,5 +20,10 @@ git clone https://github.com/dille12/MIMOSA.git
 cd MIMOSA
 pip install -r requirements.txt
 ```
+On Linux, TKinter must be installed via bash:
+```
+sudo apt-get update
+sudo apt-get install python3-tk
+```
 Download the neural network package from the Releases tab by clicking [here](https://github.com/dille12/MIMOSA/releases/tag/1.0).
 
