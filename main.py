@@ -44,6 +44,7 @@ from AI.loadCustomModel import load_custom_segmentation_model
 from core.funcs.rectRenderer import rectRenderer
 from core.keyhint import KeyHint
 from core.configureMask import configureMask
+from core.funcs.toolTip import toolTip
 
 LOADLOCKSTATE["load_point"] = "Imports Done!"
 
@@ -276,6 +277,8 @@ class App(ImageDisplayCache):
 
         
         self.initMenus()
+
+        self.CONFIGTOOLTIP = toolTip(self, self, "Configuration", "")
 
         self.buttonAddSample = Button(self, "Add new sample", [50,70], tooltip="Add a new sample to the batch. Each sample is processed separately.")
         self.buttonAddData = Button(self, "Load image batch", [50,105], tooltip="Load a batch of images to be processed. Images require a .txt file in tandem for metadata.")

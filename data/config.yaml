@@ -7,12 +7,17 @@ field_of_view:
     MAGNIFICATION_KEY: CM_MAG
     line_separator: $
   metadata:
-    FOV_KEY: CM_FIELD_OF_VIEW
-    FOV_KEY_X: CZ_SEM.ap_stage_field_size_x
-    FOV_KEY_Y: CM_FIELD_OF_VIEW_Y
-    STAGE_POS_KEY: CM_STAGE_POSITION
-    IMAGE_SIZE_KEY: CM_IMAGE_SIZE
-    MAGNIFICATION_KEY: CM_MAG
+    FOV_KEY:                              # Crucial, gets the real-world dimensions of the image
+    FOV_KEY_X: CZ_SEM.ap_width            # Use X and Y tags if separate
+    FOV_KEY_Y: CZ_SEM.ap_height
+    PIXEL_SIZE: 
+    STAGE_POS_KEY: 
+    STAGE_POS_X: 
+    STAGE_POS_Y: 
+    IMAGE_SIZE_KEY:                       # Gets the native resolution of the image. If using cropped images, this allows the software to calculate the FOV correctly.
+    IMAGE_SIZE_KEY_X: ImageWidth          # Leave above blank if tags feature the resolution as individual tags
+    IMAGE_SIZE_KEY_Y: ImageLength
+    MAGNIFICATION_KEY: CM_MAG             # Not important, provides more info on the images.
   exif:
     tag: XResolution
   constant:

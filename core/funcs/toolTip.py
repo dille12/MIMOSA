@@ -1,16 +1,26 @@
 
-def splitText(text, maxLength = 50):
-    textSplitten = text.split(" ")
-    returnText = []
-    currText = ""
-    for word in textSplitten:
-        if len(word) + len(currText) <= maxLength:
-            currText += word + " "
-        else:
-            returnText.append(currText)
-            currText = word + " "
-    returnText.append(currText)
-    return returnText
+def splitText(text, maxLength=50):
+    """
+    Split text into lines no longer than maxLength.
+    Explicit '\n' in the text is treated as a hard split with priority.
+    """
+    segments = text.split("\n")
+    result = []
+
+    for seg in segments:
+        words = seg.split(" ")
+        curr = ""
+        for word in words:
+            if len(curr) + len(word) <= maxLength:
+                curr += word + " "
+            else:
+                if curr:
+                    result.append(curr.rstrip())
+                curr = word + " "
+        if curr:
+            result.append(curr.rstrip())
+
+    return result
 
 
 
@@ -20,21 +30,30 @@ class toolTip:
         self.app = app
         self.parent = parent
         self.title = title
-        self.text = splitText(text, maxLength=30)
-        for i in range(len(self.text)):
-            self.text[i] = self.text[i].strip(" ")
+        self.setText(text)
 
         self.invokeTick = self.app.GT(30, oneshot = True)
         self.app.tooltips.append(self)
         self.renderedLastTick = False
-        self.textRendered = []
+        
+        self.titleColor = titleColor
+        self.textColor = textColor
+        self.reRender()
 
-        title = self.app.font.render(self.title, True, titleColor)
+    def setText(self, text):
+        self.text = splitText(text, maxLength=30)
+        for i in range(len(self.text)):
+            self.text[i] = self.text[i].strip(" ")
+
+    def reRender(self):
+        
+        self.textRendered = []
+        title = self.app.font.render(self.title, True, self.titleColor)
 
         maxX = title.get_size()[0] + 10
         maxY = 30
         for x in self.text:
-            t = self.app.fontSmall.render(x, True, textColor)
+            t = self.app.fontSmall.render(x, True, self.textColor)
             self.textRendered.append(t)
             maxX = max(maxX, t.get_size()[0])
             maxY += 25

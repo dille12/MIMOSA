@@ -23,7 +23,7 @@ from scipy.stats import mode
 import tkinter as tk
 from core.globalArray import update_global_dispersion_data
 
-from utils.metadataExtract import extract_value, flatten_dict
+from utils.metadataExtract import extract_value, flatten_dict, normalize_value
 
 def export_csv_with_dialog(csv_string, default_filename="dispersion_data.csv"):
 
@@ -273,9 +273,9 @@ class ImageDataObj:
 
         
 
-
+        self.STAGEPOSITION = [float(x) for x in self.STAGEPOSITION]
         print("Stage Position:", self.STAGEPOSITION)
-        res = [int(x) for x in self.IMAGERES]
+        res = [int(float(x)) for x in self.IMAGERES]
         print("RES:", res)
         self.FOV = NF.parseToFOV(self.FOVVal, res)
         print(self.FOV)
@@ -299,16 +299,16 @@ class ImageDataObj:
         if mode == "textfile":
             print("LOADING FROM TEXTFILE")
             d = fetchData(self.txtPath, self.app)
-            d = flatten_dict(d)
+            #d = flatten_dict(d)
 
             FOVKEY      = cfg["textfile"].get("FOV_KEY", "FOV")
             RESKEY      = cfg["textfile"].get("IMAGE_SIZE_KEY", "IMAGE_SIZE")
             MAGKEY      = cfg["textfile"].get("MAGNIFICATION_KEY", "MAG")
             STAGEPOSKEY = cfg["textfile"].get("STAGE_POS_KEY", "STAGE_POS")
-
+            print(d)
             self.FOVVal        = extract_value(d, FOVKEY, fmt="raw", default="500µm 500µm")
             self.IMAGERES      = extract_value(d, RESKEY, fmt="list_float", default=[1024.0, 1024.0])
-            self.MAGNIFICATION = extract_value(d, MAGKEY, fmt="float", default=100.0)
+            self.MAGNIFICATION = extract_value(d, MAGKEY, fmt="auto", default=100.0)
             self.STAGEPOSITION = extract_value(d, STAGEPOSKEY, fmt="list_first_two_float", default=[0.0, 0.0])
 
             print(self.FOVVal, self.IMAGERES, self.MAGNIFICATION, self.STAGEPOSITION)
@@ -326,14 +326,18 @@ class ImageDataObj:
             tags = flatten_dict(tags)
 
             FOVKEY      = cfg["metadata"].get("FOV_KEY", "XResolution")
+            if not FOVKEY:
+                FOVKEY = [cfg["metadata"].get("FOV_KEY_X", "XResolution"), cfg["metadata"].get("FOV_KEY_Y", "YResolution")]
             RESKEY      = cfg["metadata"].get("IMAGE_SIZE_KEY", "ImageWidth")
+            if not RESKEY:
+                RESKEY = [cfg["metadata"].get("IMAGE_SIZE_KEY_X", "XResolution"), cfg["metadata"].get("IMAGE_SIZE_KEY_Y", "XResolution")]
             MAGKEY      = cfg["metadata"].get("MAGNIFICATION_KEY", "UnknownTag")
             STAGEPOSKEY = cfg["metadata"].get("STAGE_POS_KEY", "UnknownTag2")
 
-            self.FOVVal        = extract_value(tags, FOVKEY, fmt="raw", default=["500µm", "500µm"])
-            self.IMAGERES      = extract_value(tags, RESKEY, fmt="float", default=[1024.0, 1024.0])
-            self.MAGNIFICATION = extract_value(tags, MAGKEY, fmt="float", default=100.0)
-            self.STAGEPOSITION = extract_value(tags, STAGEPOSKEY, fmt="list_first_two_float", default=[0.0, 0.0])
+            self.FOVVal        = normalize_value(extract_value(tags, FOVKEY, fmt="raw", default=["500µm", "500µm"]))
+            self.IMAGERES      = normalize_value(extract_value(tags, RESKEY, fmt="float", default=[1024.0, 1024.0]))
+            self.MAGNIFICATION = normalize_value(extract_value(tags, MAGKEY, fmt="float", default=100.0))
+            self.STAGEPOSITION = normalize_value(extract_value(tags, STAGEPOSKEY, fmt="list_first_two_float", default=[0.0, 0.0]))
 
             print(self.FOVVal, self.IMAGERES, self.MAGNIFICATION, self.STAGEPOSITION)
             return
@@ -1150,6 +1154,25 @@ def setButtons(app: "App"):
 
 
 def pipelineTickMenu(app: "App"):
+
+    t = app.font.render(f"CONFIG: {app.CONFIG["field_of_view"]["mode"]}", True, [255,255,255])
+    app.screen.blit(t, [50,30])
+    r = t.get_rect()
+    r.topleft = [50,30]
+    if r.collidepoint(app.mouse_pos):
+
+        text = "Current config to extract metadata from the images. Located in data/config.yaml.\n\n"
+        cfg = app.CONFIG["field_of_view"][app.CONFIG["field_of_view"]["mode"]]
+        
+        for x in cfg:
+            if not cfg[x]:
+                continue
+            text += f"{x}: {cfg[x]}\n"
+        app.CONFIGTOOLTIP.setText(text)
+        app.CONFIGTOOLTIP.reRender()
+
+        app.CONFIGTOOLTIP.render()
+
     if app.buttonAddSample.tick():
         text = simpledialog.askstring("Input", "Enter name of the sample:")
         if text not in app.SAMPLEDATA and text:
