@@ -75,26 +75,10 @@ Optionally, use 'KERAS_Model' to handle the workflow automatically. If particles
 
 ## The pipeline tool
 
-To use the standard pipeline setup, in the node tab, select Edit/Setup/Load, and select the presets/PIPELINE_STD.pkl. This network uses the KERAS_Model node to extract the particles and is usable for ~90% of acceptable quality images. Ensure you have the neural networks downloaded. Select the pipeline tab, which automates the workflow for large image batches. Add a sample with the button and rename it. Each sample forms it's own dispersion data from the images that are listed below it. Load an image batch. If images do not load, see console for output, check the data/config.yaml and post an issue to the GitHub. More info at section **Setting up the metadata for images**. Drag and drop the images from **Unsorted** to the sample you have created. When images are under the correct samples, press **Run AI**. This button runs the currently loaded node network in the **Node** tab on every image, so ensure you have 'pipelineRoot' and 'pipelineExport' as the endpoints of the structure (the preset PIPELINE_STD.pkl already has them). After the images have processed, press **Inspect results**. 
+To use the standard pipeline setup, in the node tab, select Edit/Setup/Load, and select the presets/PIPELINE_STD.pkl. This network uses the KERAS_Model node to extract the particles and is usable for ~90% of acceptable quality images. Ensure you have the neural networks downloaded. Select the pipeline tab, which automates the workflow for large image batches. Add a sample with the button and rename it. Each sample forms it's own dispersion data from the images that are listed below it. Load an image batch. If images do not load, see console for output, check the data/config.yaml and post an issue to the GitHub. More info at section **Setting up the metadata for images**. Drag and drop the images from **Unsorted** to the sample you have created. When images are under the correct samples, press **Run AI**. This button runs the currently loaded node network in the **Node** tab on every image, so ensure you have 'pipelineRoot' and 'pipelineExport' as the endpoints of the structure (the preset PIPELINE_STD.pkl already has them). After the images have processed, and each image is colored YELLOW, press **Inspect results**. This step is required to visually inspect if the particle maps are accurate enough. Press **Toggle** to switch between the raw image and the particle map. If the particle map is not satisfactory, select **Don't use**, otherwise **Use**. When the images have been inspected, each image should be either green or red indicating wether the image will be used in the analysis. Select **Calculate Dispersion**. The operation should be fast, and if the progress bar freezes, check console for errors and post an issue if an error has occured. When the progress bar finishes, right click a sample and select **View dispersion data**. A bar graph of the particles detected based on diameter is shown, as well as statistical information of the particles. Toggling **Toggle Area** will switch the graph to display the area taken up by the particles on the same graph. Clicking a value will result in automatic copying to clipboard of the value. A CSV file can be exported of the samples, and an excel file is automatically updated in **data/compiled_dispersion_data.xlsx**. 
 
-### Extracted Particle Properties
 
-For each labeled component, MIMOSA computes:
-
-* Pixel area
-* Equivalent circular diameter
-* Major/minor axis lengths
-* Aspect ratio
-* Perimeter
-* Convex hull area
-* Centroid position
-* Intensity‑derived statistics
-
-The system supports exporting results to CSV or Excel workbook for further analysis.
-
----
-
-## Visualization and Inspection
+# Visualization and Inspection
 
 ### Real‑Time Display
 
@@ -117,9 +101,9 @@ Only field of view is mandatory to extract. Metadata survives across node transi
 
 ## Setting up the metadata for images
 
-To get the real-world dimensions of the particles, the metadata must be extracted alongside the images. The metadata extraction keys are located in data/config.yaml. There are two options available: textfile and metadata. The textfile option is set up for **JEOL IT-500**, where the metadata is output as a .txt file alongside the image, and metadata option is set up for **ZEISS ULTRAplus** where the metadata is embedded in the image.
-1. Select the correct option. If the image is not accompanied with a text file, select metadata, otherwise select textfile. 
-2. Select correct keys. A visual tool to inspect the keys of an image is located in utils/metadataTool.py. Load an image, and search for values such as FOV, fieldofview, ap_width, ap_height or such. If the field of view values are located in a single key (e.g. [100um, 80um], set the key to FOV_KEY. If the values are separate, set the keys FOV_KEY_X and FOV_KEY_Y).
+To get the real-world dimensions of the particles, the metadata must be extracted alongside the images. The metadata extraction keys are located in **data/config.yaml**. There are two options available: **textfile** and **metadata**. The **textfile** option is set up for **JEOL IT-500**, where the metadata is output as a .txt file alongside the image, and **metadata** option is set up for **ZEISS ULTRAplus** where the metadata is embedded in the image. By default, the **metadata** option is toggled on, and the configuration is set up for **ZEISS ULTRAplus**.
+1. Select the correct option. If the image is not accompanied with a text file, set **mode** to **metadata**, otherwise set **textfile**. 
+2. Select field of view keys. A visual tool to inspect the keys of an image is located in **utils/metadataTool.py**. Load an image, and search for values such as FOV, fieldofview, ap_width, ap_height or such. If the field of view values are located in a single key (e.g. [100um, 80um], set the key to FOV_KEY. If the values are separate, set the keys FOV_KEY_X and FOV_KEY_Y).
 3. Extract the keys for magnification, stage position and image resolution if necessary. 
 
 *Note: Since the metadata can appear in many forms, it is not guaranteed that the data will load correctly for specific microscopes. Minimal changes to the code might be necessary.
@@ -179,7 +163,7 @@ All nodes are listed in core/nodefuncs.py. Nodes are automatically registered an
 MIMOSA can import external scripts for:
 
 * More complex post-processing
-* Particle analysis
+* Particle analysis and pre-emptive exporting
 * Anything really
 
 ---

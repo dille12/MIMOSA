@@ -14,6 +14,10 @@
 
 ---
 
+## Documentation
+## [Documentation](docs/DOCUMENTATION.md)
+
+
 ## Installation
 ```bash
 git clone https://github.com/dille12/MIMOSA.git
