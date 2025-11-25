@@ -14,7 +14,6 @@
 
 ---
 
-## Documentation
 ## [Documentation](docs/DOCUMENTATION.md)
 
 
