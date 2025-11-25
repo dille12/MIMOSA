@@ -10,9 +10,9 @@ MIMOSA targets research environments where particle morphology, size distributio
 
 ## Core Concepts
 
-### 1. Node‑Based Processing
+### Node‑Based Processing
 
-All operations are implemented as modular processing nodes. A node receives an image and optional metadata, applies a transformation, and outputs both a transformed image and updated metadata. Nodes expose:
+All operations are implemented as modular processing nodes. A node receives an image, applies a transformation, and outputs a transformed image. Nodes expose:
 
 * A callable processing function.
 * A metadata signature describing required inputs and produced outputs.
@@ -44,6 +44,13 @@ MIMOSA is designed for images up to **5120×4800** pixels and above. To maintain
 * The pipeline executes synchronously to guarantee deterministic results.
 * Certain nodes internally use multi‑threaded Numba/NumPy/SciPy operations.
 * Progress and timing statistics are visualized using Pygame during execution.
+
+### Real‑Time Display
+
+The GUI uses **Pygame** for:
+
+* All graphical elements, such as buttons and nodes.
+* Interactive image panning
 
 ---
 
@@ -77,15 +84,6 @@ Optionally, use 'KERAS_Model' to handle the workflow automatically. If particles
 
 To use the standard pipeline setup, in the node tab, select Edit/Setup/Load, and select the presets/PIPELINE_STD.pkl. This network uses the KERAS_Model node to extract the particles and is usable for ~90% of acceptable quality images. Ensure you have the neural networks downloaded. Select the pipeline tab, which automates the workflow for large image batches. Add a sample with the button and rename it. Each sample forms it's own dispersion data from the images that are listed below it. Load an image batch. If images do not load, see console for output, check the data/config.yaml and post an issue to the GitHub. More info at section **Setting up the metadata for images**. Drag and drop the images from **Unsorted** to the sample you have created. When images are under the correct samples, press **Run AI**. This button runs the currently loaded node network in the **Node** tab on every image, so ensure you have 'pipelineRoot' and 'pipelineExport' as the endpoints of the structure (the preset PIPELINE_STD.pkl already has them). After the images have processed, and each image is colored YELLOW, press **Inspect results**. This step is required to visually inspect if the particle maps are accurate enough. Press **Toggle** to switch between the raw image and the particle map. If the particle map is not satisfactory, select **Don't use**, otherwise **Use**. When the images have been inspected, each image should be either green or red indicating wether the image will be used in the analysis. Select **Calculate Dispersion**. The operation should be fast, and if the progress bar freezes, check console for errors and post an issue if an error has occured. When the progress bar finishes, right click a sample and select **View dispersion data**. A bar graph of the particles detected based on diameter is shown, as well as statistical information of the particles. Toggling **Toggle Area** will switch the graph to display the area taken up by the particles on the same graph. Clicking a value will result in automatic copying to clipboard of the value. A CSV file can be exported of the samples, and an excel file is automatically updated in **data/compiled_dispersion_data.xlsx**. 
 
-
-# Visualization and Inspection
-
-### Real‑Time Display
-
-The GUI uses **Pygame** for:
-
-* All graphical elements, such as buttons and nodes.
-* Interactive image panning
 
 
 ## Metadata System
@@ -141,7 +139,7 @@ A new node requires:
 * Correct amount of outputs.
 
 Example:
-'
+```bash
 def cropY(image: np.ndarray, Node: "Node", App: "App") -> np.ndarray:     
     # Node and App can be input into the node without creating additional graphical inputs. These can access all the information of the runtime.
     """
@@ -154,19 +152,10 @@ def cropY(image: np.ndarray, Node: "Node", App: "App") -> np.ndarray:
     Y = int(image.shape[1] * factor)
     return image[:, :Y, :]                      # Return a numpy array.
 
-'
+```
 
 All nodes are listed in core/nodefuncs.py. Nodes are automatically registered and exposed to the GUI. *Note: Importing a function from a package or another script will result in the generation of a node with that function. This can be used to import custom functions from a separate file.
 
-### Integration With Custom Scripts
-
-MIMOSA can import external scripts for:
-
-* More complex post-processing
-* Particle analysis and pre-emptive exporting
-* Anything really
-
----
 
 ## Known Limitations
 
