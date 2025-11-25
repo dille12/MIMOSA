@@ -112,7 +112,7 @@ To get the real-world dimensions of the particles, the metadata must be extracte
 
 ### Supported Input Formats
 
-* TIFF (including multi‑page and metadata extraction)
+* TIFF (metadata extraction)
 * PNG
 * JPEG
 * Raw 8‑bit grayscale
@@ -163,6 +163,7 @@ All nodes are listed in core/nodefuncs.py. Nodes are automatically registered an
 * GPU acceleration for TensorFlow is not feasible on Windows.
 * Some SciPy morphological operations scale super‑linearly with particle count.
 * The AI models are not perfect, and can result in poor particle maps with low quality images.
+* Multipage TIFFs might pose problems.
 
 ---
 
