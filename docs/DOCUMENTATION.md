@@ -112,7 +112,7 @@ Only field of view is mandatory to extract. Metadata survives across node transi
 
 ## Setting up the metadata for images
 
-To get the real-world dimensions of the particles, the metadata must be extracted alongside the images. The metadata extraction keys are located in data/config.yaml. There are two options available: textfile and metadata. The textfile option is set up for JEOL IT-500, where the metadata is output as a .txt file alongside the image, and metadata option is set up for x where the metadata is embedded in the image.
+To get the real-world dimensions of the particles, the metadata must be extracted alongside the images. The metadata extraction keys are located in data/config.yaml. There are two options available: textfile and metadata. The textfile option is set up for **JEOL IT-500**, where the metadata is output as a .txt file alongside the image, and metadata option is set up for **ZEISS ULTRAplus** where the metadata is embedded in the image.
 1. Select the correct option. If the image is not accompanied with a text file, select metadata, otherwise select textfile. 
 2. Select correct keys. A visual tool to inspect the keys of an image is located in utils/metadataTool.py. Load an image, and search for values such as FOV, fieldofview, ap_width, ap_height or such. If the field of view values are located in a single key (e.g. [100um, 80um], set the key to FOV_KEY. If the values are separate, set the keys FOV_KEY_X and FOV_KEY_Y).
 3. Extract the keys for magnification, stage position and image resolution if necessary. 
