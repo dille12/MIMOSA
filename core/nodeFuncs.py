@@ -429,7 +429,6 @@ def particleSeparation(imageRaw: np.ndarray, Node: "Node") -> np.ndarray:
 
 def enhance_contrast(image: np.ndarray) -> np.ndarray:
     """
-
     MENUTYPE:Contrast
     HELP:Enhances the contrast automatically using local detection.
     """
@@ -447,7 +446,6 @@ def enhance_contrast(image: np.ndarray) -> np.ndarray:
 
 def cropY(image: np.ndarray, Node: "Node") -> np.ndarray:
     """
-
     SLIDER:0.1:1:1:Y
     MENUTYPE:Essential
     HELP:Crops the Y axis from the bottom.
@@ -512,7 +510,6 @@ def calculate_circularity(image: np.ndarray) -> dict:
 
 def exportText(item) -> None:
     """
-
     MENUTYPE:Essential
     HELP:Outputs a file of the raw data provided.
     """

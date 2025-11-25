@@ -1,5 +1,5 @@
 field_of_view:
-  mode: metadata
+  mode: textfile
   textfile:
     FOV_KEY: CM_FIELD_OF_VIEW
     STAGE_POS_KEY: CM_STAGE_POSITION

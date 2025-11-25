@@ -18,8 +18,6 @@ import math
 
 
 
-
-
 def raster_scan_reveal(screen, source_surface, progress, position, kernel_size=5):
     """
     Reveals an image progressively using a raster scanning pattern with kernels.
